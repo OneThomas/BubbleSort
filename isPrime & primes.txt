@@ -1,0 +1,31 @@
+07/12/2017 10:56
+
+This is a good-performanced and easy-to-understand implementation, in which isPrime and primes are defined recursively, and primes will be cached by default. primeFactors definition is just a proper use of primes, the result will contains continuous-duplicated numbers, this feature makes it easy to count the number of each factor via (map (head &&& length) . group) and it's easy to unique it via (map head . group) :
+
+isPrime :: Int -> Bool
+primes :: [Int]
+
+isPrime n | n < 2 = False
+isPrime n = all (\p -> n `mod` p /= 0) . takeWhile ((<= n) . (^ 2)) $ primes
+primes = 2 : filter isPrime [3..]
+
+primeFactors :: Int -> [Int]
+primeFactors n = iter n primes where
+    iter n (p:_) | n < p^2 = [n | n > 1]
+    iter n ps@(p:ps') =
+        let (d, r) = n `divMod` p
+        in if r == 0 then p : iter d ps else iter n ps'
+And the usage:
+
+> import Data.List
+> import Control.Arrow
+
+> primeFactors 12312
+[2,2,2,3,3,3,3,19]
+
+> (map (head &&& length) . group) (primeFactors 12312)
+[(2,3),(3,4),(19,1)]
+
+> (map head . group) (primeFactors 12312)
+[2,3,19]
+
